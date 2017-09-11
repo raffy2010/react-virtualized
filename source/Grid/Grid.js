@@ -315,6 +315,8 @@ export default class Grid extends React.PureComponent {
 
     const deferredMeasurementCache = props.deferredMeasurementCache;
 
+    this._verticalOffsetDelta = 0;
+    this._deltaY = 0;
     this._columnSizeAndPositionManager = new ScalingCellSizeAndPositionManager({
       batchAllCells:
         deferredMeasurementCache !== undefined &&
@@ -639,6 +641,16 @@ export default class Grid extends React.PureComponent {
       }
     }
 
+    if (!this.state.isScrolling && this._verticalOffsetDelta > 0) {
+      this._scrollingContainer.scrollTop += this._verticalOffsetDelta;
+
+      this.setState({
+        scrollTop: scrollTop + this._verticalOffsetDelta
+      });
+
+      this._verticalOffsetDelta = 0;
+    }
+
     // Special case where the previous size was 0:
     // In this case we don't show any windowed cells at all.
     // So we should always recalculate offset afterwards.
@@ -674,6 +686,7 @@ export default class Grid extends React.PureComponent {
 
     if (this._recomputeScrollTopFlag) {
       this._recomputeScrollTopFlag = false;
+
       this._updateScrollTopForScrollToRow(this.props);
     } else {
       updateScrollIndexHelper({
@@ -992,10 +1005,22 @@ export default class Grid extends React.PureComponent {
           offset: scrollLeft
         }
       );
+
+      const sizeAndPosition = this._rowSizeAndPositionManager._cellSizeAndPositionManager._cellSizeAndPositionData[this._renderedRowStartIndex]
+      this._deltaY = sizeAndPosition &&
+        sizeAndPosition.lastOffset !== 0 &&
+        sizeAndPosition.offset > sizeAndPosition.lastOffset ? sizeAndPosition.offset - sizeAndPosition.lastOffset : 0;
+
+      this._verticalOffsetDelta += this._deltaY;
+
+      if (this._deltaY > 0) {
+        sizeAndPosition.lastOffset = sizeAndPosition.offset;
+      }
+
       const visibleRowIndices = this._rowSizeAndPositionManager.getVisibleCellRange(
         {
           containerSize: height,
-          offset: scrollTop
+          offset: scrollTop + this._verticalOffsetDelta
         }
       );
 
@@ -1055,6 +1080,12 @@ export default class Grid extends React.PureComponent {
       this._rowStartIndex = overscanRowIndices.overscanStartIndex;
       this._rowStopIndex = overscanRowIndices.overscanStopIndex;
 
+      const updateOffsetDelta = (
+        isScrolling && this._deltaY !== 0
+      ) || (
+        !isScrolling && this._deltaY === 0
+      );
+
       this._childrenToDisplay = cellRangeRenderer({
         cellCache: this._cellCache,
         cellRenderer,
@@ -1073,7 +1104,9 @@ export default class Grid extends React.PureComponent {
         styleCache: this._styleCache,
         verticalOffsetAdjustment,
         visibleColumnIndices,
-        visibleRowIndices
+        visibleRowIndices,
+        verticleOffsetDelta: this._verticalOffsetDelta,
+        updateOffsetDelta
       });
     }
   }

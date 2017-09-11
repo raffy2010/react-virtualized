@@ -23,7 +23,9 @@ export default function defaultCellRangeRenderer({
   styleCache,
   verticalOffsetAdjustment,
   visibleColumnIndices,
-  visibleRowIndices
+  visibleRowIndices,
+  verticleOffsetDelta,
+  updateOffsetDelta
 }: CellRangeRendererParams) {
   const renderedCells = [];
 
@@ -58,7 +60,7 @@ export default function defaultCellRangeRenderer({
       let style;
 
       // Cache style objects so shallow-compare doesn't re-render unnecessarily.
-      if (canCacheStyle && styleCache[key]) {
+      if (canCacheStyle && styleCache[key] && !updateOffsetDelta) {
         style = styleCache[key];
       } else {
         // In deferred mode, cells will be initially rendered before we know their size.
@@ -82,7 +84,7 @@ export default function defaultCellRangeRenderer({
             height: rowDatum.size,
             left: columnDatum.offset + horizontalOffsetAdjustment,
             position: "absolute",
-            top: rowDatum.offset + verticalOffsetAdjustment,
+            top: rowDatum.offset + verticalOffsetAdjustment - verticleOffsetDelta,
             width: columnDatum.size
           };
 
@@ -112,7 +114,8 @@ export default function defaultCellRangeRenderer({
       if (
         isScrolling &&
         !horizontalOffsetAdjustment &&
-        !verticalOffsetAdjustment
+        !verticalOffsetAdjustment &&
+        !updateOffsetDelta
       ) {
         if (!cellCache[key]) {
           cellCache[key] = cellRenderer(cellRendererParams);

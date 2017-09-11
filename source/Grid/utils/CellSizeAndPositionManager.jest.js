@@ -159,7 +159,8 @@ describe("CellSizeAndPositionManager", () => {
         cellSizeAndPositionManager.getSizeAndPositionOfLastMeasuredCell()
       ).toEqual({
         offset: 50,
-        size: 10
+        size: 10,
+        lastOffset: 0
       });
     });
   });

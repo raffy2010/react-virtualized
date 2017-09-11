@@ -43,6 +43,8 @@ export default class CellSizeAndPositionManager {
   // Measurements for cells up to this index can be trusted; cells afterward should be estimated.
   _lastMeasuredIndex = -1;
 
+  _maxMeasuredIndex = -1;
+
   // Used in deferred mode to track which cells have been queued for measurement.
   _lastBatchedIndex = -1;
 
@@ -120,14 +122,19 @@ export default class CellSizeAndPositionManager {
 
           this._lastBatchedIndex = index;
         } else {
+          const lastCellSizeAndPosition = this._cellSizeAndPositionData[i];
+          const lastOffset = lastCellSizeAndPosition ? lastCellSizeAndPosition.offset : 0;
+
           this._cellSizeAndPositionData[i] = {
             offset,
-            size
+            size,
+            lastOffset
           };
 
           offset += size;
 
           this._lastMeasuredIndex = index;
+          this.updateMaxMeasuredIndex();
         }
       }
     }
@@ -144,20 +151,31 @@ export default class CellSizeAndPositionManager {
         };
   }
 
+  getSizeAndPositionOfMaxMeasuredCell(): SizeAndPositionData {
+    return this._maxMeasuredIndex >= 0
+      ? this.getSizeAndPositionOfCell(this._maxMeasuredIndex)
+      : {
+          offset: 0,
+          size: 0
+        };
+  }
+
   /**
    * Total size of all cells being measured.
    * This value will be completely estimated initially.
    * As cells are measured, the estimate will be updated.
    */
   getTotalSize(): number {
-    const lastMeasuredCellSizeAndPosition = this.getSizeAndPositionOfLastMeasuredCell();
-    const totalSizeOfMeasuredCells =
-      lastMeasuredCellSizeAndPosition.offset +
-      lastMeasuredCellSizeAndPosition.size;
-    const numUnmeasuredCells = this._cellCount - this._lastMeasuredIndex - 1;
-    const totalSizeOfUnmeasuredCells =
-      numUnmeasuredCells * this._estimatedCellSize;
-    return totalSizeOfMeasuredCells + totalSizeOfUnmeasuredCells;
+    if (this._cellCount > 0) {
+      const maxMeasuredCell = this.getSizeAndPositionOfMaxMeasuredCell();
+
+      const unmeasuredCount = this._cellCount - 1 - this._maxMeasuredIndex;
+      const unmeasuredSize = unmeasuredCount * this._estimatedCellSize;
+
+      return maxMeasuredCell.offset + maxMeasuredCell.size + unmeasuredSize;
+    }
+
+    return 0;
   }
 
   /**
@@ -252,6 +270,17 @@ export default class CellSizeAndPositionManager {
    */
   resetCell(index: number): void {
     this._lastMeasuredIndex = Math.min(this._lastMeasuredIndex, index - 1);
+
+    this.updateMaxMeasuredIndex();
+  }
+
+  updateMaxMeasuredIndex(): void {
+    const newMaxIndex = Math.min(
+      this._cellCount - 1,
+      Math.max(this._lastMeasuredIndex, this._maxMeasuredIndex)
+    );
+
+    this._maxMeasuredIndex = newMaxIndex;
   }
 
   _binarySearch(high: number, low: number, offset: number): number {
