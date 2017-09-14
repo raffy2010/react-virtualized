@@ -4,6 +4,9 @@ import React, { PureComponent } from "react";
 import CellMeasurer from "./CellMeasurer";
 import CellMeasurerCache from "./CellMeasurerCache";
 import List from "../List";
+import {
+  generateRandomList
+} from "../demo/utils"
 import styles from "./CellMeasurer.example.css";
 
 export default class DynamicHeightList extends PureComponent {
@@ -18,31 +21,74 @@ export default class DynamicHeightList extends PureComponent {
 
     this._cache = new CellMeasurerCache({
       fixedWidth: true,
-      minHeight: 50
+      minHeight: 50,
+      keyMapper: (rowIndex, columnIndex) => {
+        return this.state.list.get(rowIndex).random
+      }
     });
 
+    this.scrollTop = 0;
+
+    this.state = {
+      list: props.list
+    }
+
     this._rowRenderer = this._rowRenderer.bind(this);
+  }
+
+  prependCell = () => {
+    const { list } = this.state
+    const newList = Immutable.List(generateRandomList());
+
+    const targetList = newList.concat(list)
+
+    console.log('scrollTop', this.scrollTop);
+
+    this.setState({
+      list: targetList,
+      scrollToIndex:
+    })
+  }
+
+  handleScroll = ({
+    scrollTop
+  }) => {
+    this.scrollTop = scrollTop;
+
+    console.log('scroll event scrollTop', this.scrollTop);
+
+    if (scrollTop < 1000) {
+      //setTimeout(() => {
+        //this.prependCell()
+      //});
+    }
   }
 
   render() {
     const { width } = this.props;
 
     return (
-      <List
-        className={styles.BodyGrid}
-        deferredMeasurementCache={this._cache}
-        height={400}
-        overscanRowCount={0}
-        rowCount={1000}
-        rowHeight={this._cache.rowHeight}
-        rowRenderer={this._rowRenderer}
-        width={width}
-      />
+      <div>
+        <button onClick={this.prependCell}>prepend</button>
+        <List
+          className={styles.BodyGrid}
+          deferredMeasurementCache={this._cache}
+          height={400}
+          overscanRowCount={0}
+          rowCount={this.state.list.size}
+          rowHeight={this._cache.rowHeight}
+          rowRenderer={this._rowRenderer}
+          onScroll={this.handleScroll}
+          scrollTop={this.state.scrollTop}
+          width={width}
+        />
+      </div>
     );
   }
 
   _rowRenderer({ index, key, parent, style }) {
-    const { getClassName, list } = this.props;
+    const { getClassName } = this.props;
+    const { list } = this.state
 
     const datum = list.get(index % list.size);
     const classNames = getClassName({ columnIndex: 0, rowIndex: index });
@@ -62,6 +108,8 @@ export default class DynamicHeightList extends PureComponent {
       >
         {({ measure }) =>
           <div className={classNames} style={style}>
+            <p>{index}</p>
+            <p>{datum.random}</p>
             <img
               onLoad={measure}
               src={source}
