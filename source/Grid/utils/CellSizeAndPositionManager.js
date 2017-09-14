@@ -74,6 +74,15 @@ export default class CellSizeAndPositionManager {
     this._estimatedCellSize = estimatedCellSize;
   }
 
+  arrangeOffsetData(n) {
+    this._lastMeasuredIndex = -1;
+    this._cellSizeAndPositionData = {};
+
+    if (this._maxMeasuredIndex !== -1) {
+      this._maxMeasuredIndex = this._maxMeasuredIndex + n;
+    }
+  }
+
   getCellCount(): number {
     return this._cellCount;
   }

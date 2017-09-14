@@ -23,7 +23,7 @@ export default class DynamicHeightList extends PureComponent {
       fixedWidth: true,
       minHeight: 50,
       keyMapper: (rowIndex, columnIndex) => {
-        return this.state.list.get(rowIndex).random
+        return this.state.list.get(rowIndex).randomKey
       }
     });
 
@@ -46,22 +46,33 @@ export default class DynamicHeightList extends PureComponent {
 
     this.setState({
       list: targetList,
-      scrollToIndex:
+      scrollTop: this.scrollTop + 1000 * 50
     })
+  }
+
+  handleRowRender = ({
+    startIndex
+  }) => {
+    this.startIndex = startIndex
+    console.log('render', this.startIndex)
   }
 
   handleScroll = ({
     scrollTop
   }) => {
-    this.scrollTop = scrollTop;
-
     console.log('scroll event scrollTop', this.scrollTop);
 
-    if (scrollTop < 1000) {
-      //setTimeout(() => {
-        //this.prependCell()
-      //});
+    if (scrollTop < 1000 && scrollTop < this.scrollTop && !this.prependTimer) {
+      console.log('begin to prepend');
+
+      this.prependTimer = setTimeout(() => {
+        this.prependCell()
+        this.prependTimer = null;
+        console.log('prepend');
+      }, 200);
     }
+
+    this.scrollTop = scrollTop;
   }
 
   render() {
@@ -78,6 +89,8 @@ export default class DynamicHeightList extends PureComponent {
           rowCount={this.state.list.size}
           rowHeight={this._cache.rowHeight}
           rowRenderer={this._rowRenderer}
+          onRowsRendered={this.handleRowRender}
+          scrollToIndex={this.state.scrollToIndex}
           onScroll={this.handleScroll}
           scrollTop={this.state.scrollTop}
           width={width}
@@ -109,7 +122,7 @@ export default class DynamicHeightList extends PureComponent {
         {({ measure }) =>
           <div className={classNames} style={style}>
             <p>{index}</p>
-            <p>{datum.random}</p>
+            <p>{datum.randomKey}</p>
             <img
               onLoad={measure}
               src={source}

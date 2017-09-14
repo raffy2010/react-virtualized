@@ -17,6 +17,7 @@ export function generateRandomList() {
       index: i,
       name: NAMES[i % NAMES.length],
       random,
+      randomKey: `${Math.random()}-${Date.now()}`,
       randomLong: randoms.join(" "),
       size: ROW_HEIGHTS[Math.floor(Math.random() * ROW_HEIGHTS.length)]
     });

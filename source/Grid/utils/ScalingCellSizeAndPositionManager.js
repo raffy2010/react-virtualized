@@ -47,6 +47,10 @@ export default class ScalingCellSizeAndPositionManager {
     this._cellSizeAndPositionManager.configure(params);
   }
 
+  arrangeOffsetData(n) {
+    this._cellSizeAndPositionManager.arrangeOffsetData(n);
+  }
+
   getCellCount(): number {
     return this._cellSizeAndPositionManager.getCellCount();
   }
