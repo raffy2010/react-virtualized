@@ -53,6 +53,8 @@ type Props = {
 
   onRowsRendered: (params: RenderedRows) => void,
 
+  onRecomputeGrid: (rowIndex, columnIndex) => void,
+
   /**
    * Callback invoked whenever the scroll offset changes within the inner scrollable region.
    * This callback can be used to sync scrolling between lists, tables, or grids.
@@ -165,6 +167,10 @@ export default class List extends React.PureComponent {
         columnIndex
       });
     }
+
+    if (this.props.onRecomputeGrid) {
+      this.props.onRecomputeGrid(rowIndex, columnIndex);
+    }
   }
 
   /** See Grid#recomputeGridSize */
@@ -174,6 +180,10 @@ export default class List extends React.PureComponent {
         rowIndex: index,
         columnIndex: 0
       });
+    }
+
+    if (this.props.onRecomputeGrid) {
+      this.props.onRecomputeGrid(index, 0);
     }
   }
 
