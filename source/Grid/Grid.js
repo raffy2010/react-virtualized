@@ -1023,7 +1023,7 @@ export default class Grid extends React.PureComponent {
       this._verticalOffsetDelta += this._deltaY;
 
       if (this._deltaY > 0) {
-        sizeAndPosition.lastOffset = sizeAndPosition.offset;
+        this._rowSizeAndPositionManager.resetCell(0)
       }
 
       const visibleRowIndices = this._rowSizeAndPositionManager.getVisibleCellRange(
