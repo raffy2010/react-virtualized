@@ -118,17 +118,13 @@ export default class CellMeasurer extends React.PureComponent {
     }
   }
 
-  _measure = (force = false) => {
+  _measure = () => {
     const {
       cache,
       columnIndex = 0,
       parent,
       rowIndex = this.props.index || 0
     } = this.props;
-
-    if (cache.has(rowIndex, columnIndex) && !force) {
-      return
-    }
 
     const { height, width } = this._getCellMeasurements();
 

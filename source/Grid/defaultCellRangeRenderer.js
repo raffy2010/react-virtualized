@@ -56,7 +56,10 @@ export default function defaultCellRangeRenderer({
         columnIndex <= visibleColumnIndices.stop &&
         rowIndex >= visibleRowIndices.start &&
         rowIndex <= visibleRowIndices.stop;
-      let key = `${rowIndex}-${columnIndex}`;
+      let key = deferredMeasurementCache ?
+        deferredMeasurementCache._keyMapper(rowIndex, columnIndex) :
+        `${rowIndex}-${columnIndex}`;
+
       let style;
 
       // Cache style objects so shallow-compare doesn't re-render unnecessarily.

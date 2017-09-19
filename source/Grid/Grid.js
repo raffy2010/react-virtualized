@@ -1022,6 +1022,12 @@ export default class Grid extends React.PureComponent {
 
       this._verticalOffsetDelta += this._deltaY;
 
+      const updateOffsetDelta = (
+        isScrolling && this._verticalOffsetDelta > 0
+      ) || (
+        !isScrolling && this._deltaY === 0 && this._verticalOffsetDelta === 0
+      );
+
       if (this._deltaY > 0) {
         this._rowSizeAndPositionManager.resetCell(0)
       }
@@ -1088,12 +1094,6 @@ export default class Grid extends React.PureComponent {
       this._columnStopIndex = overscanColumnIndices.overscanStopIndex;
       this._rowStartIndex = overscanRowIndices.overscanStartIndex;
       this._rowStopIndex = overscanRowIndices.overscanStopIndex;
-
-      const updateOffsetDelta = (
-        isScrolling && this._deltaY !== 0
-      ) || (
-        !isScrolling && this._deltaY === 0
-      );
 
       this._childrenToDisplay = cellRangeRenderer({
         cellCache: this._cellCache,
@@ -1381,7 +1381,10 @@ export default class Grid extends React.PureComponent {
         columnIndex <= this._columnStopIndex;
         columnIndex++
       ) {
-        let key = `${rowIndex}-${columnIndex}`;
+        let key = this.props.deferredMeasurementCache ?
+          this.props.deferredMeasurementCache._keyMapper(rowIndex, columnIndex) :
+          `${rowIndex}-${columnIndex}`;
+
         this._styleCache[key] = styleCache[key];
       }
     }
