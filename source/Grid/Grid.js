@@ -804,10 +804,7 @@ export default class Grid extends React.PureComponent {
       estimatedCellSize: this._getEstimatedRowSize(nextProps)
     });
 
-    if (
-      nextProps.rowCount > this.props.rowCount &&
-      (nextProps.scrollTop && nextProps.scrollTop > this.props.scrollTop)
-    ) {
+    if (nextProps.rowCount > this.props.rowCount) {
       this._rowSizeAndPositionManager.arrangeOffsetData(
         nextProps.rowCount - this.props.rowCount
       );
