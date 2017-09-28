@@ -150,6 +150,10 @@ export default class List extends React.PureComponent {
         columnIndex
       });
     }
+
+    if (this.props.onRecomputeGrid) {
+      this.props.onRecomputeGrid(rowIndex, columnIndex);
+    }
   }
 
   /** See Grid#measureAllCells */
