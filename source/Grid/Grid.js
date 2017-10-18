@@ -641,7 +641,14 @@ export default class Grid extends React.PureComponent {
       }
     }
 
-    if (!this.state.isScrolling && this._verticalOffsetDelta > 0) {
+    const needPreventOverflow = this._verticalOffsetDelta > 0 &&
+      this.state.isScrolling &&
+      this.state.scrollDirectionVertical === SCROLL_DIRECTION_FORWARD;
+
+    if (
+      needPreventOverflow ||
+      (!this.state.isScrolling && this._verticalOffsetDelta > 0)
+    ) {
       this._scrollingContainer.scrollTop += this._verticalOffsetDelta;
 
       this.setState({
@@ -1000,6 +1007,11 @@ export default class Grid extends React.PureComponent {
     } = state;
 
     const isScrolling = this._isScrolling(props, state);
+
+    // recompute offset data to get buffer offset
+    if (!isScrolling) {
+      this._rowSizeAndPositionManager.getTotalSize();
+    }
 
     this._childrenToDisplay = [];
 
